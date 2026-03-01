@@ -25,11 +25,14 @@ export function HomeContent() {
   const router = useRouter()
   const apiBase = process.env.NEXT_PUBLIC_API_URL
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   const [trending, setTrending] = useState<TrendingItem[]>([])
   const [stores, setStores] = useState<PopularStore[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [stats, setStats] = useState<PublicStats | null>(null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     Promise.all([
@@ -53,26 +56,26 @@ export function HomeContent() {
         <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-accent/[0.02] blur-[100px]" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col px-6">
+      <div className="relative mx-auto flex min-h-screen max-w-4xl flex-col px-4 sm:px-6">
         {/* Header */}
-        <header className="flex items-center justify-between pt-6">
+        <header className="flex items-center justify-between pt-5 sm:pt-6">
           <Logo size="sm" />
           <nav className="flex items-center gap-1">
             <a
               href="#stats"
-              className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="hidden sm:inline-flex rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               About
             </a>
             <Link
               href="/console/register"
-              className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="hidden sm:inline-flex rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               API
             </Link>
             <Link
               href="/console/login"
-              className="ml-2 rounded-xl bg-secondary px-4 py-1.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="ml-2 rounded-xl bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-4"
             >
               Sign In
             </Link>
@@ -81,7 +84,11 @@ export function HomeContent() {
               className="ml-1 rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground"
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {mounted ? (
+                theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
             </button>
           </nav>
         </header>
@@ -96,7 +103,7 @@ export function HomeContent() {
             </span>
           </div>
 
-          <h1 className="mb-3 text-center text-5xl font-bold leading-tight tracking-tight text-foreground md:text-6xl text-balance">
+          <h1 className="mb-3 text-center text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl md:text-6xl text-balance">
             Find anything.
             <br />
             <span className="text-accent">Everywhere.</span>

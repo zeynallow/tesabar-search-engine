@@ -54,9 +54,9 @@ export function ProductCard({ product, layout = "grid", isInCompare, onToggleCom
 
   if (layout === "list") {
     return (
-      <article className="group relative flex gap-5 rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:border-accent/30 hover:shadow-[0_0_30px_rgba(80,200,120,0.06)]">
+      <article className="group relative flex gap-3 rounded-2xl border border-border bg-card p-3 transition-all duration-300 hover:border-accent/30 hover:shadow-[0_0_30px_rgba(80,200,120,0.06)] sm:gap-5 sm:p-4">
         {/* Image */}
-        <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-xl bg-secondary">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-secondary sm:h-36 sm:w-36">
           <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-muted-foreground/30">
             {product.name.charAt(0)}
           </div>
@@ -96,17 +96,17 @@ export function ProductCard({ product, layout = "grid", isInCompare, onToggleCom
               </div>
             )}
           </div>
-          <div className="flex items-end justify-between">
-            <div className="flex items-baseline gap-2">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div className="flex items-baseline gap-1.5">
               {product.price != null ? (
-                <span className="text-xl font-bold text-foreground">
+                <span className="text-base font-bold text-foreground sm:text-xl">
                   {product.currency ?? "$"}{product.price.toLocaleString()}
                 </span>
               ) : (
-                <span className="text-xl font-bold text-muted-foreground">—</span>
+                <span className="text-base font-bold text-muted-foreground sm:text-xl">—</span>
               )}
               {product.original_price != null && (
-                <span className="text-sm text-muted-foreground line-through">
+                <span className="text-xs text-muted-foreground line-through sm:text-sm">
                   {product.currency ?? "$"}{product.original_price.toLocaleString()}
                 </span>
               )}
@@ -114,26 +114,27 @@ export function ProductCard({ product, layout = "grid", isInCompare, onToggleCom
                 <span className="text-xs font-medium text-accent">-{discount}%</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {onToggleCompare && (
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onToggleCompare() }}
-                  className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 ${
                     isInCompare
                       ? "border-accent bg-accent/10 text-accent"
                       : "border-border bg-secondary text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <Check className="h-3 w-3" />
-                  {isInCompare ? "Selected" : "Compare"}
+                  <span className="hidden sm:inline">{isInCompare ? "Selected" : "Compare"}</span>
                 </button>
               )}
               <button
                 onClick={visitStore}
-                className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:gap-1.5 sm:px-3"
               >
-                Visit Store
+                <span className="hidden sm:inline">Visit Store</span>
+                <span className="sm:hidden">Visit</span>
                 <ExternalLink className="h-3 w-3" />
               </button>
             </div>
@@ -163,8 +164,8 @@ export function ProductCard({ product, layout = "grid", isInCompare, onToggleCom
             -{discount}%
           </div>
         )}
-        {/* Hover overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100">
+        {/* Hover overlay — desktop only */}
+        <div className="absolute inset-0 hidden items-center justify-center bg-background/60 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100 sm:flex">
           <button
             onClick={visitStore}
             className="flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-accent-foreground transition-all hover:opacity-90 active:scale-95"
@@ -257,6 +258,15 @@ export function ProductCard({ product, layout = "grid", isInCompare, onToggleCom
             </div>
           )}
         </div>
+
+        {/* Visit button — mobile only (hover overlay handles desktop) */}
+        <button
+          onClick={visitStore}
+          className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-xl bg-secondary py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:hidden"
+        >
+          Visit Store
+          <ExternalLink className="h-3 w-3" />
+        </button>
       </div>
     </article>
   )

@@ -49,6 +49,7 @@ export function SearchResults() {
   const query = searchParams.get("q") || ""
   const apiBase = process.env.NEXT_PUBLIC_API_URL
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   const [layout, setLayout] = useState<"grid" | "list">("grid")
   const [activeCategory, setActiveCategory] = useState("")
@@ -90,6 +91,8 @@ export function SearchResults() {
       setDebouncedPriceMax(max)
     }, 500)
   }
+
+  useEffect(() => { setMounted(true) }, [])
 
   // Reset page when any filter/sort/query changes (but not when page itself changes)
   useEffect(() => {
@@ -161,24 +164,30 @@ export function SearchResults() {
     <div className="min-h-screen bg-background">
       {/* Top Bar */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-3">
-          <Logo size="sm" />
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:gap-4 sm:px-6 sm:py-3">
+          <div className="hidden sm:block shrink-0">
+            <Logo size="sm" />
+          </div>
           <div className="flex-1">
             <SearchBar defaultValue={query} size="md" showSuggestions={false} />
           </div>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground"
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {mounted ? (
+              theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
           </button>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Search Meta */}
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-3 sm:py-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1">
               {loading ? (
@@ -246,7 +255,7 @@ export function SearchResults() {
             </button>
 
             {/* Layout toggle */}
-            <div className="flex overflow-hidden rounded-lg border border-border">
+            <div className="hidden sm:flex overflow-hidden rounded-lg border border-border">
               <button
                 onClick={() => setLayout("grid")}
                 className={`p-1.5 transition-colors ${
@@ -420,19 +429,19 @@ export function SearchResults() {
           <div
             className={
               layout === "grid"
-                ? "grid gap-4 pb-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                ? "grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
                 : "flex flex-col gap-3 pb-10"
             }
           >
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={`animate-pulse rounded-2xl bg-secondary ${layout === "grid" ? "aspect-[3/4]" : "h-36"}`} />
+              <div key={i} className={`animate-pulse rounded-2xl bg-secondary ${layout === "grid" ? "aspect-[3/4]" : "h-24 sm:h-36"}`} />
             ))}
           </div>
         ) : (
           <div
             className={
               layout === "grid"
-                ? "grid gap-4 pb-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                ? "grid grid-cols-2 gap-3 pb-10 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
                 : "flex flex-col gap-3 pb-10"
             }
           >
@@ -516,15 +525,15 @@ export function SearchResults() {
 
       {/* Compare Bar */}
       {compareIds.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 px-6 py-3 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between">
-            <div className="flex items-center gap-3">
-              <GitCompare className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium text-foreground">
-                {compareIds.length} product{compareIds.length !== 1 ? "s" : ""} selected
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 px-4 py-2.5 backdrop-blur-xl sm:px-6 sm:py-3">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <GitCompare className="h-4 w-4 shrink-0 text-accent" />
+              <span className="text-xs font-medium text-foreground sm:text-sm">
+                {compareIds.length} <span className="hidden sm:inline">product{compareIds.length !== 1 ? "s" : ""} </span>selected
               </span>
               {compareIds.length < 2 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="hidden text-xs text-muted-foreground sm:inline">
                   (select {2 - compareIds.length} more to compare)
                 </span>
               )}
@@ -532,14 +541,14 @@ export function SearchResults() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCompareIds([])}
-                className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-lg px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:px-3"
               >
                 Clear
               </button>
               <button
                 onClick={fetchCompare}
                 disabled={compareIds.length < 2 || compareLoading}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-1.5 text-xs font-medium text-accent-foreground transition-opacity disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground transition-opacity disabled:opacity-50 sm:px-4"
               >
                 {compareLoading
                   ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -555,7 +564,7 @@ export function SearchResults() {
       {/* Compare Modal */}
       {showCompareModal && compareResult && (
         <div className="fixed inset-0 z-[60] overflow-auto bg-background/95 backdrop-blur-xl">
-          <div className="mx-auto max-w-6xl px-6 py-8">
+          <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-foreground">Product Comparison</h2>

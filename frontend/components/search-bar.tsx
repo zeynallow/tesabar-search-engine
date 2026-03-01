@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, X } from "lucide-react"
+import { Search, X, ArrowRight } from "lucide-react"
 import { useState, useRef, useEffect, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 
@@ -112,7 +112,7 @@ export function SearchBar({
               if (showSuggestions && suggestions.length > 0) setShowDropdown(true)
             }}
             onBlur={() => setIsFocused(false)}
-            placeholder="Search millions of products across stores..."
+            placeholder={isLg ? "Search millions of products across stores..." : "Search products..."}
             autoFocus={autoFocus}
             className={`flex-1 bg-transparent outline-none placeholder:text-muted-foreground/60 ${
               isLg ? "mx-4 text-lg" : "mx-3 text-sm"
@@ -134,10 +134,11 @@ export function SearchBar({
           <button
             type="submit"
             className={`shrink-0 rounded-xl bg-accent text-accent-foreground font-medium transition-all hover:opacity-90 active:scale-95 ${
-              isLg ? "px-6 py-2.5 text-sm" : "px-4 py-1.5 text-xs"
+              isLg ? "px-5 py-2.5 text-sm sm:px-6" : "px-3 py-1.5 text-xs sm:px-4"
             }`}
           >
-            Search
+            <span className="hidden sm:inline">Search</span>
+            <ArrowRight className={`sm:hidden ${isLg ? "h-4 w-4" : "h-3.5 w-3.5"}`} />
           </button>
         </div>
       </form>
