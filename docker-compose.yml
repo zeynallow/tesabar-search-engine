@@ -123,6 +123,21 @@ services:
     networks:
       - tesabar_net
 
+  # ── Test Sites (local development only) ─────────────────────────────────────
+  test-sites:
+    build:
+      context: ./test-sites
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8081:8081"   # TechStore  (Electronics)
+      - "8082:8082"   # FashionHub (Clothing)
+      - "8083:8083"   # HomeDecor  (Furniture)
+    networks:
+      - tesabar_net
+    profiles:
+      - test
+
   # ── Celery Beat ──────────────────────────────────────────────────────────────
   beat:
     build:

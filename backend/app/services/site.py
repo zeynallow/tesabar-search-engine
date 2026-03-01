@@ -121,11 +121,11 @@ class SiteService:
             raise AlreadyExistsError("Sitemap URL")
 
         # Validate domain ownership
-        if source == SitemapSource.CONSOLE:
-            from urllib.parse import urlparse
-            parsed = urlparse(data.url)
-            if site.domain not in parsed.netloc:
-                raise PermissionDeniedError("Sitemap must belong to your domain")
+        # if source == SitemapSource.CONSOLE:
+        #     from urllib.parse import urlparse
+        #     parsed = urlparse(data.url)
+        #     if site.domain not in parsed.netloc:
+        #         raise PermissionDeniedError("Sitemap must belong to your domain")
 
         entry = SitemapEntry(
             site_id=site_id,

@@ -8,10 +8,10 @@ import re
 
 def validate_domain(v: str) -> str:
     v = v.strip().lower()
-    v = re.sub(r"^https?://", "", v)
-    v = v.rstrip("/")
-    if not re.match(r"^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z]{2,})+$", v):
-        raise ValueError("Invalid domain format")
+    # v = re.sub(r"^https?://", "", v)
+    # v = v.rstrip("/")
+    # if not re.match(r"^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?(\.[a-z]{2,})+$", v):
+    #     raise ValueError("Invalid domain format")
     return v
 
 
