@@ -37,6 +37,12 @@ export default function AdminUsersPage() {
 
   const base = process.env.NEXT_PUBLIC_API_URL
 
+  const filtered = users.filter((u) =>
+    !search ||
+    u.email.toLowerCase().includes(search.toLowerCase()) ||
+    u.full_name?.toLowerCase().includes(search.toLowerCase())
+  )
+
   function getToken() {
     return typeof window !== "undefined" ? localStorage.getItem("admin_token") : null
   }
