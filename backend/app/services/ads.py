@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.core.exceptions import NotFoundError, PermissionDeniedError, QuotaExceededError
 from app.schemas.ads import (
     CampaignCreateRequest, CampaignUpdateRequest, AdGroupCreateRequest,
-    AdCreateRequest, CampaignStatsResponse, AdStatsResponse,
+    AdCreateRequest, AdUpdateRequest, CampaignStatsResponse, AdStatsResponse,
 )
 import structlog
 import uuid
@@ -96,6 +96,14 @@ class AdsService:
             status=AdStatus.PENDING_REVIEW,
         )
         return await self.ad_repo.create(ad)
+
+    async def update_ad(self, ad_id: uuid.UUID, data: AdUpdateRequest, user: User) -> Ad:
+        ad = await self.ad_repo.get_by_id(ad_id)
+        if not ad:
+            raise NotFoundError("Ad", ad_id)
+        await self._assert_site_owner(ad.site_id, user)
+        update_data = data.model_dump(exclude_none=True)
+        return await self.ad_repo.update(ad, **update_data)
 
     async def record_click(self, ad_id: uuid.UUID, ip: str, user_agent: str, query: str) -> AdClick:
         ad = await self.ad_repo.get_by_id(ad_id)

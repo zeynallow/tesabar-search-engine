@@ -4,7 +4,7 @@ from app.api.deps import CurrentUser, DB
 from app.schemas.ads import (
     CampaignCreateRequest, CampaignUpdateRequest, CampaignResponse,
     AdGroupCreateRequest, AdGroupResponse,
-    AdCreateRequest, AdResponse,
+    AdCreateRequest, AdUpdateRequest, AdResponse,
     CampaignStatsResponse, AdStatsResponse,
 )
 from app.schemas.common import MessageResponse
@@ -104,4 +104,15 @@ async def list_ads(
     ad_repo = AdRepository(db)
     ads = await ad_repo.get_by_group(group_id)
     return [AdResponse.model_validate(a) for a in ads]
+
+
+@router.patch("/campaigns/{campaign_id}/groups/{group_id}/ads/{ad_id}", response_model=AdResponse)
+async def update_ad(
+    site_id: uuid.UUID, campaign_id: uuid.UUID, group_id: uuid.UUID, ad_id: uuid.UUID,
+    data: AdUpdateRequest, current_user: CurrentUser, db: DB,
+):
+    """Update ad status or settings (activate, pause, etc.)."""
+    service = AdsService(db)
+    ad = await service.update_ad(ad_id, data, current_user)
+    return AdResponse.model_validate(ad)
 

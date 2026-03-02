@@ -1070,10 +1070,31 @@ function AdsList({ siteId, campaignId, groupId, authH, apiBase }: {
   const [newAd, setNewAd] = useState({ headline: "", description: "", destination_url: "", bid_amount: "0.10" })
   const [adding, setAdding] = useState(false)
 
+  const adStatusColors: Record<string, string> = {
+    active: "bg-accent/10 text-accent",
+    paused: "bg-amber-400/10 text-amber-400",
+    pending_review: "bg-blue-400/10 text-blue-400",
+    disapproved: "bg-destructive/10 text-destructive",
+  }
+
+  const adsUrl = `${apiBase}/api/v1/console/sites/${siteId}/ads/campaigns/${campaignId}/groups/${groupId}/ads`
+
   useEffect(() => {
-    fetch(`${apiBase}/api/v1/console/sites/${siteId}/ads/campaigns/${campaignId}/groups/${groupId}/ads`, { headers: authH })
+    fetch(adsUrl, { headers: authH })
       .then((r) => r.json()).then((d) => setAds(Array.isArray(d) ? d : [])).catch(() => {}).finally(() => setLoading(false))
   }, [siteId, campaignId, groupId, apiBase, authH]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function updateAdStatus(adId: string, status: string) {
+    const res = await fetch(`${adsUrl}/${adId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...authH },
+      body: JSON.stringify({ status }),
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setAds((prev) => prev.map((a) => (String(a.id) === adId ? updated : a)))
+    }
+  }
 
   async function createAd() {
     setAdding(true)
@@ -1121,14 +1142,35 @@ function AdsList({ siteId, campaignId, groupId, authH, apiBase }: {
       {ads.length === 0 ? (
         <p className="text-[10px] text-muted-foreground">No ads yet in this group.</p>
       ) : (
-        ads.map((ad) => (
-          <div key={String(ad.id)} className="rounded-lg border border-border bg-card px-3 py-2">
-            <p className="text-xs font-medium text-foreground">{String(ad.headline ?? "")}</p>
-            {ad.description && <p className="text-[10px] text-muted-foreground truncate">{String(ad.description)}</p>}
-            <p className="text-[10px] text-accent truncate">{String(ad.destination_url ?? "")}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Bid: ${Number(ad.bid_amount ?? 0).toFixed(2)} · {Number(ad.impressions ?? 0)} impr · {Number(ad.clicks ?? 0)} clicks</p>
-          </div>
-        ))
+        ads.map((ad) => {
+          const adStatus = String(ad.status ?? "pending_review")
+          const adId = String(ad.id)
+          return (
+            <div key={adId} className="rounded-lg border border-border bg-card px-3 py-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground">{String(ad.headline ?? "")}</p>
+                  {ad.description && <p className="text-[10px] text-muted-foreground truncate">{String(ad.description)}</p>}
+                  <p className="text-[10px] text-accent truncate">{String(ad.destination_url ?? "")}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Bid: ${Number(ad.bid_amount ?? 0).toFixed(2)} · {Number(ad.impressions ?? 0)} impr · {Number(ad.clicks ?? 0)} clicks</p>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className={`text-[10px] font-medium capitalize px-2 py-0.5 rounded-lg ${adStatusColors[adStatus] ?? "bg-secondary text-muted-foreground"}`}>
+                    {adStatus.replace("_", " ")}
+                  </span>
+                  {(adStatus === "pending_review" || adStatus === "paused") && (
+                    <button onClick={() => updateAdStatus(adId, "active")}
+                      className="text-[10px] rounded-lg border border-accent/50 px-2 py-0.5 text-accent hover:bg-accent/10">Activate</button>
+                  )}
+                  {adStatus === "active" && (
+                    <button onClick={() => updateAdStatus(adId, "paused")}
+                      className="text-[10px] rounded-lg border border-border px-2 py-0.5 text-muted-foreground hover:text-foreground">Pause</button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })
       )}
     </div>
   )

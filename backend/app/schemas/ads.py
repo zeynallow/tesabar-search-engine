@@ -79,6 +79,12 @@ class AdGroupResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class AdUpdateRequest(BaseModel):
+    status: Optional[AdStatus] = None
+    bid_amount: Optional[float] = None
+    headline: Optional[str] = None
+
+
 class AdCreateRequest(BaseModel):
     headline: str
     description: Optional[str] = None
