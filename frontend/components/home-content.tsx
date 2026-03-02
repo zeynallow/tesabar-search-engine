@@ -9,6 +9,9 @@ import { SearchBar } from "@/components/search-bar"
 import { TrendingCard } from "@/components/trending-card"
 import { StoreChip } from "@/components/store-chip"
 import { Logo } from "@/components/logo"
+import { useLang } from "@/lib/i18n"
+import type { Lang } from "@/lib/i18n"
+import { useCountryDetect } from "@/hooks/use-country"
 
 interface TrendingItem { query: string; category: string; count: string }
 interface PopularStore { id: string; name: string; domain: string; total_pages_indexed: number }
@@ -26,6 +29,10 @@ export function HomeContent() {
   const apiBase = process.env.NEXT_PUBLIC_API_URL
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const { t, lang, setLang } = useLang()
+
+  // Detect country from IP on first visit
+  useCountryDetect()
 
   const [trending, setTrending] = useState<TrendingItem[]>([])
   const [stores, setStores] = useState<PopularStore[]>([])
@@ -40,8 +47,8 @@ export function HomeContent() {
       fetch(`${apiBase}/api/v1/search/popular-stores?limit=6`).then((r) => r.json()).catch(() => ({ stores: [] })),
       fetch(`${apiBase}/api/v1/search/categories?limit=12`).then((r) => r.json()).catch(() => ({ categories: [] })),
       fetch(`${apiBase}/api/v1/search/stats`).then((r) => r.json()).catch(() => null),
-    ]).then(([t, s, c, st]) => {
-      if (Array.isArray(t.trending)) setTrending(t.trending)
+    ]).then(([tr, s, c, st]) => {
+      if (Array.isArray(tr.trending)) setTrending(tr.trending)
       if (Array.isArray(s.stores)) setStores(s.stores)
       if (Array.isArray(c.categories)) setCategories(c.categories)
       if (st && typeof st.total_sites === "number") setStats(st)
@@ -65,19 +72,19 @@ export function HomeContent() {
               href="#stats"
               className="hidden sm:inline-flex rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              About
+              {t("about")}
             </a>
             <Link
               href="/console/register"
               className="hidden sm:inline-flex rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              API
+              {t("api")}
             </Link>
             <Link
               href="/console/login"
               className="ml-2 rounded-xl bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-4"
             >
-              Sign In
+              {t("signIn")}
             </Link>
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -98,20 +105,20 @@ export function HomeContent() {
           <div className="mb-6 flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-accent" />
             <span className="text-xs font-medium text-muted-foreground">
-              Searching across{" "}
-              {stats ? `${fmtNumber(stats.total_products_indexed)} products from ${fmtNumber(stats.total_sites)} stores` : "millions of products from thousands of stores"}
+              {stats
+                ? `${t("searchingAcross")} ${fmtNumber(stats.total_products_indexed)} ${t("fromStores")} ${fmtNumber(stats.total_sites)} stores`
+                : t("millionsOfProducts")}
             </span>
           </div>
 
           <h1 className="mb-3 text-center text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl md:text-6xl text-balance">
-            Find anything.
+            {t("heroTitle1")}
             <br />
-            <span className="text-accent">Everywhere.</span>
+            <span className="text-accent">{t("heroTitle2")}</span>
           </h1>
 
           <p className="mb-10 max-w-lg text-center text-base leading-relaxed text-muted-foreground text-pretty">
-            The smartest way to search across every online store. 
-            Compare prices, find deals, and shop smarter.
+            {t("heroSubtitle")}
           </p>
 
           {/* Search */}
@@ -139,10 +146,10 @@ export function HomeContent() {
         <section id="stats" className="border-t border-border py-10">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
-              { icon: Globe, label: "Stores Indexed", value: stats ? fmtNumber(stats.total_sites) : "—" },
-              { icon: BarChart3, label: "Products", value: stats ? fmtNumber(stats.total_products_indexed) : "—" },
-              { icon: Zap, label: "Avg. Response", value: "0.2s" },
-              { icon: ShieldCheck, label: "Verified Sellers", value: "98%" },
+              { icon: Globe, label: t("storesIndexed"), value: stats ? fmtNumber(stats.total_sites) : "—" },
+              { icon: BarChart3, label: t("products"), value: stats ? fmtNumber(stats.total_products_indexed) : "—" },
+              { icon: Zap, label: t("avgResponse"), value: "0.2s" },
+              { icon: ShieldCheck, label: t("verifiedSellers"), value: "98%" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -160,8 +167,8 @@ export function HomeContent() {
         {trending.length > 0 && (
           <section className="border-t border-border py-10">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Trending Now</h2>
-              <span className="text-xs text-muted-foreground">From live index</span>
+              <h2 className="text-lg font-semibold text-foreground">{t("trendingNow")}</h2>
+              <span className="text-xs text-muted-foreground">{t("fromLiveIndex")}</span>
             </div>
             <div className="grid gap-2 md:grid-cols-2">
               {trending.map((item) => (
@@ -175,12 +182,12 @@ export function HomeContent() {
         {stores.length > 0 && (
           <section className="border-t border-border py-10">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Popular Stores</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t("popularStores")}</h2>
               <button
                 onClick={() => router.push("/search")}
                 className="text-xs text-accent transition-colors hover:underline"
               >
-                View all
+                {t("viewAll")}
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -200,13 +207,29 @@ export function HomeContent() {
             <div className="flex items-center gap-4">
               <Logo size="sm" />
               <span className="text-xs text-muted-foreground">
-                The e-commerce search engine.
+                {t("tagline")}
               </span>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <a href="#" className="transition-colors hover:text-foreground">Privacy</a>
-              <a href="#" className="transition-colors hover:text-foreground">Terms</a>
-              <a href="#" className="transition-colors hover:text-foreground">Contact</a>
+              <a href="#" className="transition-colors hover:text-foreground">{t("privacy")}</a>
+              <a href="#" className="transition-colors hover:text-foreground">{t("terms")}</a>
+              <a href="#" className="transition-colors hover:text-foreground">{t("contact")}</a>
+              {/* Language switcher */}
+              <div className="flex items-center gap-1 rounded-lg border border-border bg-secondary p-0.5">
+                {(["az", "en"] as Lang[]).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase transition-all ${
+                      lang === l
+                        ? "bg-accent text-accent-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </footer>

@@ -34,6 +34,7 @@ class SiteService:
             domain=data.domain.lower(),
             name=data.name,
             description=data.description,
+            country=data.country,
             status=SiteStatus.PENDING,
             verification_token=verification_token,
             verification_method="dns_txt",

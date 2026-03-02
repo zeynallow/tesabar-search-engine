@@ -4,8 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 export default function ConsoleLoginPage() {
+  const { t } = useLang()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -60,9 +62,9 @@ export default function ConsoleLoginPage() {
         </div>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Indexed Stores", value: "10K+" },
+            { label: t("indexedStores"), value: "10K+" },
             { label: "Products", value: "500M+" },
-            { label: "Daily Searches", value: "2M+" },
+            { label: t("dailySearches"), value: "2M+" },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-secondary p-4">
               <div className="text-xl font-bold text-foreground">{s.value}</div>
@@ -88,15 +90,15 @@ export default function ConsoleLoginPage() {
             </span>
           </Link>
 
-          <h1 className="text-2xl font-bold text-foreground mb-1">Welcome back</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-1">{t("welcomeBack")}</h1>
           <p className="text-sm text-muted-foreground mb-8">
-            Sign in to your Console account
+            {t("signInConsole")}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Email address
+                {t("emailAddress")}
               </label>
               <input
                 type="email"
@@ -109,7 +111,7 @@ export default function ConsoleLoginPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Password
+                {t("password")}
               </label>
               <div className="relative">
                 <input
@@ -150,9 +152,9 @@ export default function ConsoleLoginPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            {t("noAccount")}{" "}
             <Link href="/console/register" className="text-accent hover:underline font-medium">
-              Create one
+              {t("createOne")}
             </Link>
           </p>
         </div>

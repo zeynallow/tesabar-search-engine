@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { User, Lock, CheckCircle2, Loader2, AlertCircle } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface UserProfile {
   id: string
@@ -14,6 +15,7 @@ interface UserProfile {
 }
 
 export default function SettingsPage() {
+  const { t } = useLang()
   const token = typeof window !== "undefined" ? localStorage.getItem("console_token") : null
   const apiBase = process.env.NEXT_PUBLIC_API_URL
   const authH = { Authorization: `Bearer ${token}` }
@@ -77,8 +79,8 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">Settings</h1>
-      <p className="text-sm text-muted-foreground mb-8">Manage your account details and security</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t("settings")}</h1>
+      <p className="text-sm text-muted-foreground mb-8">{t("manageAccountDetails")}</p>
 
       {/* Profile Card */}
       <div className="mb-6 rounded-2xl border border-border bg-card p-6">
@@ -86,29 +88,29 @@ export default function SettingsPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
             <User className="h-4 w-4 text-accent" />
           </div>
-          <h2 className="text-sm font-semibold text-foreground">Account Profile</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("accountProfile")}</h2>
         </div>
 
         {profile ? (
           <div className="space-y-4">
-            <Row label="Email" value={profile.email} />
-            <Row label="Full Name" value={profile.full_name ?? "—"} />
-            <Row label="Company" value={profile.company_name ?? "—"} />
+            <Row label={t("email")} value={profile.email} />
+            <Row label={t("fullName")} value={profile.full_name ?? "—"} />
+            <Row label={t("company")} value={profile.company_name ?? "—"} />
             <div className="flex items-center justify-between pt-2 border-t border-border">
-              <span className="text-xs text-muted-foreground">Email Verified</span>
+              <span className="text-xs text-muted-foreground">{t("emailVerified")}</span>
               {profile.is_verified ? (
                 <span className="flex items-center gap-1 text-xs font-medium text-accent">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Verified
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {t("verified")}
                 </span>
               ) : (
                 <span className="flex items-center gap-1 text-xs font-medium text-amber-400">
-                  <AlertCircle className="h-3.5 w-3.5" /> Not verified
+                  <AlertCircle className="h-3.5 w-3.5" /> {t("notVerified")}
                 </span>
               )}
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Could not load profile.</p>
+          <p className="text-sm text-muted-foreground">{t("couldNotLoadProfile")}</p>
         )}
       </div>
 
@@ -118,24 +120,24 @@ export default function SettingsPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10">
             <Lock className="h-4 w-4 text-accent" />
           </div>
-          <h2 className="text-sm font-semibold text-foreground">Change Password</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("changePassword")}</h2>
         </div>
 
         <div className="space-y-3">
           <Field
-            label="Current Password"
+            label={t("currentPassword")}
             type="password"
             value={pwForm.current_password}
             onChange={(v) => setPwForm((p) => ({ ...p, current_password: v }))}
           />
           <Field
-            label="New Password"
+            label={t("newPassword")}
             type="password"
             value={pwForm.new_password}
             onChange={(v) => setPwForm((p) => ({ ...p, new_password: v }))}
           />
           <Field
-            label="Confirm New Password"
+            label={t("confirmNewPassword")}
             type="password"
             value={pwForm.confirm}
             onChange={(v) => setPwForm((p) => ({ ...p, confirm: v }))}
@@ -148,7 +150,7 @@ export default function SettingsPage() {
           )}
           {pwSuccess && (
             <p className="flex items-center gap-1.5 text-xs text-accent">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Password changed successfully
+              <CheckCircle2 className="h-3.5 w-3.5" /> {t("passwordChanged")}
             </p>
           )}
 
@@ -159,7 +161,7 @@ export default function SettingsPage() {
               className="flex items-center gap-2 rounded-xl bg-accent px-5 py-2 text-sm font-medium text-accent-foreground hover:opacity-90 disabled:opacity-60 transition-opacity"
             >
               {pwLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Update Password
+              {t("updatePassword")}
             </button>
           </div>
         </div>

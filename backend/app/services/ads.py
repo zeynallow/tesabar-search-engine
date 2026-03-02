@@ -146,6 +146,18 @@ class AdsService:
             active_ads_count=len(active_ads),
         )
 
+    async def auto_manage_campaign_statuses(self):
+        """Activate DRAFT campaigns whose start_date has arrived; end ACTIVE campaigns whose end_date has passed."""
+        to_activate = await self.campaign_repo.get_draft_campaigns_to_activate()
+        for campaign in to_activate:
+            await self.campaign_repo.update(campaign, status=CampaignStatus.ACTIVE)
+            logger.info("Campaign auto-activated", campaign_id=str(campaign.id))
+
+        to_end = await self.campaign_repo.get_active_campaigns_to_end()
+        for campaign in to_end:
+            await self.campaign_repo.update(campaign, status=CampaignStatus.ENDED)
+            logger.info("Campaign auto-ended", campaign_id=str(campaign.id))
+
     async def update_es_ad_boosts(self):
         """Update ad boost scores in Elasticsearch for active ads."""
         es = await get_es()

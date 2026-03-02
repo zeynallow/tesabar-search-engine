@@ -36,6 +36,7 @@ class AdminSiteDetailResponse(BaseModel):
     domain: str
     name: str
     description: Optional[str]
+    country: Optional[str]
     owner_email: str
     owner_id: uuid.UUID
     status: SiteStatus

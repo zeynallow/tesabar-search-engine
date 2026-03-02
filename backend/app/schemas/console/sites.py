@@ -19,11 +19,22 @@ class SiteCreateRequest(BaseModel):
     domain: str
     name: str
     description: Optional[str] = None
+    country: Optional[str] = None
 
     @field_validator("domain")
     @classmethod
     def _validate_domain(cls, v: str) -> str:
         return validate_domain(v)
+
+    @field_validator("country")
+    @classmethod
+    def _validate_country(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        v = v.strip().upper()
+        if len(v) != 2 or not v.isalpha():
+            raise ValueError("Country must be a 2-letter ISO code (e.g. AZ, US)")
+        return v
 
 
 class SiteUpdateRequest(BaseModel):
@@ -42,6 +53,7 @@ class SiteResponse(BaseModel):
     domain: str
     name: str
     description: Optional[str]
+    country: Optional[str]
     status: SiteStatus
     is_domain_verified: bool
     total_pages_indexed: int

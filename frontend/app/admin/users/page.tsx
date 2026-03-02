@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Users, Search, CheckCircle2, XCircle, ShieldCheck, ChevronLeft, ChevronRight, Plus, Trash2, Loader2 } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface AdminUser {
   id: string
@@ -26,6 +27,7 @@ interface CreateUserForm {
 const EMPTY_FORM: CreateUserForm = { email: "", password: "", full_name: "", company_name: "", is_admin: false }
 
 export default function AdminUsersPage() {
+  const { t } = useLang()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
@@ -140,14 +142,14 @@ export default function AdminUsersPage() {
     <div className="p-6 lg:p-8">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Users</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">All registered site owners and admins</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("usersTitle")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("allUsersDesc")}</p>
         </div>
         <button
           onClick={() => { setShowCreate(true); setCreateError("") }}
           className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-background hover:opacity-90 transition-all shrink-0"
         >
-          <Plus className="h-4 w-4" /> Create User
+          <Plus className="h-4 w-4" /> {t("createUser")}
         </button>
       </div>
 
@@ -155,12 +157,12 @@ export default function AdminUsersPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-            <h2 className="text-base font-semibold text-foreground mb-4">Create New User</h2>
+            <h2 className="text-base font-semibold text-foreground mb-4">{t("createNewUser")}</h2>
             <form onSubmit={createUser} className="space-y-3">
               {[
-                { label: "Full Name", key: "full_name", type: "text", placeholder: "John Doe" },
-                { label: "Email", key: "email", type: "email", placeholder: "user@example.com" },
-                { label: "Password", key: "password", type: "password", placeholder: "Min. 8 characters" },
+                { label: t("fullName"), key: "full_name", type: "text", placeholder: "John Doe" },
+                { label: t("email"), key: "email", type: "email", placeholder: "user@example.com" },
+                { label: t("password"), key: "password", type: "password", placeholder: "Min. 8 characters" },
                 { label: "Company Name", key: "company_name", type: "text", placeholder: "Acme Inc. (optional)" },
               ].map(({ label, key, type, placeholder }) => (
                 <div key={key}>
@@ -182,7 +184,7 @@ export default function AdminUsersPage() {
                   onChange={(e) => setForm((f) => ({ ...f, is_admin: e.target.checked }))}
                   className="h-4 w-4 rounded border-border accent-accent"
                 />
-                Grant admin privileges
+                {t("grantAdmin")}
               </label>
               {createError && (
                 <div className="rounded-xl bg-destructive/10 border border-destructive/30 px-4 py-2.5 text-xs text-destructive">{createError}</div>
@@ -193,14 +195,14 @@ export default function AdminUsersPage() {
                   disabled={creating}
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-foreground py-2.5 text-sm font-medium text-background hover:opacity-90 disabled:opacity-60 transition-all"
                 >
-                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create User"}
+                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : t("createUser")}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShowCreate(false); setCreateError(""); setForm(EMPTY_FORM) }}
                   className="rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>
@@ -216,7 +218,7 @@ export default function AdminUsersPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by email or name…"
+            placeholder={t("searchByEmail")}
             className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60 focus:border-accent transition-colors"
           />
         </div>
@@ -229,11 +231,11 @@ export default function AdminUsersPage() {
             <thead>
               <tr className="border-b border-border bg-secondary/50">
                 <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">User</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Role</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("role")}</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("status")}</th>
                 <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Sites</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Joined</th>
-                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Actions</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("joined")}</th>
+                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -249,7 +251,7 @@ export default function AdminUsersPage() {
                 <tr>
                   <td colSpan={6} className="px-5 py-16 text-center">
                     <Users className="mx-auto mb-2 h-8 w-8 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground">No users found</p>
+                    <p className="text-sm text-muted-foreground">{t("noUsersFound")}</p>
                   </td>
                 </tr>
               ) : (
@@ -272,17 +274,17 @@ export default function AdminUsersPage() {
                           <ShieldCheck className="h-2.5 w-2.5" /> Admin
                         </span>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground font-medium">Site Owner</span>
+                        <span className="text-[10px] text-muted-foreground font-medium">{t("siteOwner")}</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5">
                       {user.is_active ? (
                         <span className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                          <CheckCircle2 className="h-2.5 w-2.5" /> Active
+                          <CheckCircle2 className="h-2.5 w-2.5" /> {t("statusActive")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">
-                          <XCircle className="h-2.5 w-2.5" /> Inactive
+                          <XCircle className="h-2.5 w-2.5" /> {t("inactive")}
                         </span>
                       )}
                     </td>
@@ -298,7 +300,7 @@ export default function AdminUsersPage() {
                               : "text-accent hover:bg-accent/10"
                           }`}
                         >
-                          {user.is_active ? "Deactivate" : "Activate"}
+                          {user.is_active ? t("deactivate") : t("activate")}
                         </button>
                         <button
                           onClick={() => toggleAdmin(user.id, user.is_admin)}
@@ -308,7 +310,7 @@ export default function AdminUsersPage() {
                               : "text-blue-400 hover:bg-blue-400/10"
                           }`}
                         >
-                          {user.is_admin ? "Revoke Admin" : "Make Admin"}
+                          {user.is_admin ? t("revokeAdmin") : t("makeAdmin")}
                         </button>
                         <button
                           onClick={() => deleteUser(user.id)}

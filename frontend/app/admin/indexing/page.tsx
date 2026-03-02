@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Activity, CheckCircle2, Clock, Loader2, XCircle, AlertCircle, RefreshCw, Zap, TrendingUp } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface IndexingJob {
   id: string
@@ -19,6 +20,7 @@ interface IndexingJob {
 const STATUS_TABS = ["all", "running", "queued", "completed", "failed"]
 
 export default function AdminIndexingPage() {
+  const { t } = useLang()
   const [jobs, setJobs] = useState<IndexingJob[]>([])
   const [statusFilter, setStatusFilter] = useState("all")
   const [loading, setLoading] = useState(true)
@@ -106,11 +108,11 @@ export default function AdminIndexingPage() {
     <div className="p-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Indexing Jobs</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("indexingJobsTitle")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Monitor crawl and index pipeline —
-            <span className="text-accent font-medium"> {counts.running} running</span>,
-            <span className="text-amber-400 font-medium"> {counts.queued} queued</span>
+            {t("monitorPipeline")} —
+            <span className="text-accent font-medium"> {counts.running} {t("running")}</span>,
+            <span className="text-amber-400 font-medium"> {counts.queued} {t("queued")}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -121,13 +123,13 @@ export default function AdminIndexingPage() {
             }`}
           >
             <RefreshCw className={`h-3.5 w-3.5 ${autoRefresh ? "animate-spin" : ""}`} />
-            Auto-refresh
+            {t("autoRefresh")}
           </button>
           <button
             onClick={fetchJobs}
             className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> {t("refresh")}
           </button>
         </div>
       </div>
@@ -141,7 +143,7 @@ export default function AdminIndexingPage() {
             className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:border-accent/40 hover:bg-accent/5 disabled:opacity-50 transition-all"
           >
             {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-accent" />}
-            Bulk Index ES
+            {t("bulkIndexES")}
           </button>
           {bulkMsg && <span className={`text-xs px-1 ${bulkMsg.startsWith("✓") ? "text-accent" : "text-destructive"}`}>{bulkMsg}</span>}
         </div>
@@ -152,7 +154,7 @@ export default function AdminIndexingPage() {
             className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:border-blue-400/40 hover:bg-blue-400/5 disabled:opacity-50 transition-all"
           >
             {boostLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <TrendingUp className="h-4 w-4 text-blue-400" />}
-            Update Ad Boosts
+            {t("updateAdBoosts")}
           </button>
           {boostMsg && <span className={`text-xs px-1 ${boostMsg.startsWith("✓") ? "text-accent" : "text-destructive"}`}>{boostMsg}</span>}
         </div>
@@ -182,7 +184,7 @@ export default function AdminIndexingPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center">
             <Activity className="mb-3 h-10 w-10 text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground">No indexing jobs found</p>
+            <p className="text-sm text-muted-foreground">{t("noJobsFound")}</p>
           </div>
         ) : (
           filtered.map((job) => <JobCard key={job.id} job={job} />)
@@ -193,6 +195,7 @@ export default function AdminIndexingPage() {
 }
 
 function JobCard({ job }: { job: IndexingJob }) {
+  const { t } = useLang()
   const pct = job.total_urls > 0 ? Math.round((job.processed_urls / job.total_urls) * 100) : 0
   const siteShort = job.site_id.slice(0, 8)
 
@@ -214,12 +217,12 @@ function JobCard({ job }: { job: IndexingJob }) {
         <div className="hidden md:flex items-center gap-6 text-right">
           <div>
             <div className="text-sm font-semibold text-foreground">{job.processed_urls.toLocaleString()}<span className="text-muted-foreground font-normal">/{job.total_urls.toLocaleString()}</span></div>
-            <div className="text-[10px] text-muted-foreground">URLs processed</div>
+            <div className="text-[10px] text-muted-foreground">{t("urlsProcessed")}</div>
           </div>
           {job.failed_urls > 0 && (
             <div>
               <div className="text-sm font-semibold text-destructive">{job.failed_urls}</div>
-              <div className="text-[10px] text-muted-foreground">failed</div>
+              <div className="text-[10px] text-muted-foreground">{t("failed")}</div>
             </div>
           )}
         </div>
@@ -229,7 +232,7 @@ function JobCard({ job }: { job: IndexingJob }) {
       {job.status === "running" && (
         <div className="mb-3">
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground">Progress</span>
+            <span className="text-[10px] text-muted-foreground">{t("progress")}</span>
             <span className="text-[10px] font-medium text-foreground">{pct}%</span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
@@ -246,8 +249,8 @@ function JobCard({ job }: { job: IndexingJob }) {
       )}
 
       <div className="mt-2 flex items-center gap-4 text-[10px] text-muted-foreground">
-        {job.started_at && <span>Started: {new Date(job.started_at).toLocaleString()}</span>}
-        {job.finished_at && <span>Completed: {new Date(job.finished_at).toLocaleString()}</span>}
+        {job.started_at && <span>{t("started")}: {new Date(job.started_at).toLocaleString()}</span>}
+        {job.finished_at && <span>{t("completed")}: {new Date(job.finished_at).toLocaleString()}</span>}
       </div>
     </div>
   )

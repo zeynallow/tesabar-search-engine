@@ -3,8 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ShieldCheck, Eye, EyeOff, Loader2 } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 export default function AdminLoginPage() {
+  const { t } = useLang()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -56,8 +58,8 @@ export default function AdminLoginPage() {
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-foreground">
             <ShieldCheck className="h-7 w-7 text-background" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Restricted access — authorized personnel only</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("adminPanelTitle")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("restrictedAccess")}</p>
         </div>
 
         {/* Form card */}
@@ -65,7 +67,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Admin Email
+                {t("adminEmail")}
               </label>
               <input
                 type="email"
@@ -79,7 +81,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Password</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("password")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -112,14 +114,13 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In to Admin"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("signInToAdmin")}
             </button>
           </form>
         </div>
 
         <p className="mt-5 text-center text-[11px] text-muted-foreground/60">
-          This area is restricted to Tesabar system administrators.<br />
-          Unauthorized access attempts are logged.
+          {t("restrictedNote")}
         </p>
 
         <div className="mt-4 text-center">

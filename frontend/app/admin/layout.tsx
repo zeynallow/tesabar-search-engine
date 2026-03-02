@@ -4,13 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ShieldCheck, LayoutDashboard, Globe, Users, Activity, LogOut, ChevronRight } from "lucide-react"
-
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/sites", label: "All Sites", icon: Globe },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/indexing", label: "Indexing Jobs", icon: Activity },
-]
+import { useLang } from "@/lib/i18n"
 
 const AUTH_ROUTES = ["/admin/login"]
 
@@ -24,8 +18,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const [ready, setReady] = useState(false)
   const [me, setMe] = useState<AdminMe | null>(null)
+  const { t } = useLang()
 
   const isAuthRoute = AUTH_ROUTES.includes(pathname)
+
+  const navItems = [
+    { href: "/admin", label: t("navDashboard"), icon: LayoutDashboard, exact: true },
+    { href: "/admin/sites", label: t("allSites"), icon: Globe },
+    { href: "/admin/users", label: t("users"), icon: Users },
+    { href: "/admin/indexing", label: t("indexingJobs"), icon: Activity },
+  ]
 
   useEffect(() => {
     if (isAuthRoute) {
@@ -70,8 +72,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <ShieldCheck className="h-4 w-4 text-background" />
           </div>
           <div>
-            <div className="text-sm font-bold tracking-tight">Tesabar Admin</div>
-            <div className="text-[10px] text-muted-foreground">System Control</div>
+            <div className="text-sm font-bold tracking-tight">Tesabar {t("adminPanel")}</div>
+            <div className="text-[10px] text-muted-foreground">{t("systemControl")}</div>
           </div>
         </div>
 
@@ -98,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="border-t border-border p-3">
           <div className="mb-2 rounded-xl bg-secondary px-3 py-2">
-            <p className="text-[10px] font-medium text-muted-foreground">Signed in as</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{t("signedInAs")}</p>
             <p className="text-xs font-semibold text-foreground truncate">{me?.email ?? "—"}</p>
             {me?.full_name && (
               <p className="text-[10px] text-muted-foreground truncate">{me.full_name}</p>
@@ -109,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {t("signOut")}
           </button>
         </div>
       </aside>
@@ -120,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-background" />
           </div>
-          <span className="text-sm font-bold">Admin Panel</span>
+          <span className="text-sm font-bold">{t("adminPanel")}</span>
         </header>
         <div className="flex-1 overflow-auto">
           {children}

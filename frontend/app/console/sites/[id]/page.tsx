@@ -918,6 +918,10 @@ function AdsTab({ siteId }: { siteId: string }) {
                     <span className={`text-[10px] font-medium capitalize px-2 py-0.5 rounded-lg ${statusColors[status] ?? "bg-secondary text-muted-foreground"}`}>
                       {status.replace("_", " ")}
                     </span>
+                    {status === "draft" && (
+                      <button onClick={() => updateCampaignStatus(cId, "active")}
+                        className="text-[10px] rounded-lg border border-accent/50 px-2 py-0.5 text-accent hover:bg-accent/10">Activate</button>
+                    )}
                     {status === "active" && (
                       <button onClick={() => updateCampaignStatus(cId, "paused")}
                         className="text-[10px] rounded-lg border border-border px-2 py-0.5 text-muted-foreground hover:text-foreground">Pause</button>

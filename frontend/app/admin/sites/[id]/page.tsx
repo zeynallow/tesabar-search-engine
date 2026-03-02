@@ -7,6 +7,7 @@ import {
   ArrowLeft, Globe, CheckCircle2, Clock, AlertCircle, XCircle,
   RefreshCw, Plus, Loader2, Database, FileText, TriangleAlert,
 } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface SiteDetail {
   id: string
@@ -27,11 +28,12 @@ interface SiteDetail {
 const STATUS_OPTS = ["active", "pending", "suspended", "banned"]
 
 function SiteBadge({ status }: { status: string }) {
+  const { t } = useLang()
   const map: Record<string, { icon: React.ComponentType<{ className?: string }>; cls: string; label: string }> = {
-    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: "Active" },
-    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: "Pending" },
-    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: "Suspended" },
-    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: "Banned" },
+    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: t("statusActive") },
+    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: t("statusPending") },
+    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: t("statusSuspended") },
+    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: t("statusBanned") },
   }
   const cfg = map[status] || { icon: Globe, cls: "bg-secondary text-muted-foreground", label: status }
   const Icon = cfg.icon
@@ -45,6 +47,7 @@ function SiteBadge({ status }: { status: string }) {
 export default function AdminSiteDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const { t } = useLang()
   const [site, setSite] = useState<SiteDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [statusValue, setStatusValue] = useState("")
@@ -144,8 +147,8 @@ export default function AdminSiteDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center p-6 py-24 text-center">
         <Globe className="mb-3 h-10 w-10 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">Site not found</p>
-        <Link href="/admin/sites" className="mt-4 text-xs text-accent hover:underline">← Back to sites</Link>
+        <p className="text-sm text-muted-foreground">{t("siteNotFound")}</p>
+        <Link href="/admin/sites" className="mt-4 text-xs text-accent hover:underline">← {t("allSitesTitle")}</Link>
       </div>
     )
   }
@@ -155,7 +158,7 @@ export default function AdminSiteDetailPage() {
       {/* Back + Header */}
       <div>
         <Link href="/admin/sites" className="mb-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-3.5 w-3.5" /> All Sites
+          <ArrowLeft className="h-3.5 w-3.5" /> {t("allSitesTitle")}
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -181,9 +184,9 @@ export default function AdminSiteDetailPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {[
-          { label: "Pages Indexed", value: site.total_pages_indexed.toLocaleString(), icon: Database, cls: "text-accent" },
-          { label: "Pages Crawled", value: site.total_pages_crawled.toLocaleString(), icon: FileText, cls: "text-blue-400" },
-          { label: "Pages with Issues", value: site.total_pages_with_issues.toLocaleString(), icon: TriangleAlert, cls: "text-amber-400" },
+          { label: t("pagesIndexed"), value: site.total_pages_indexed.toLocaleString(), icon: Database, cls: "text-accent" },
+          { label: t("pagesCrawled"), value: site.total_pages_crawled.toLocaleString(), icon: FileText, cls: "text-blue-400" },
+          { label: t("pagesWithIssues"), value: site.total_pages_with_issues.toLocaleString(), icon: TriangleAlert, cls: "text-amber-400" },
         ].map((s) => (
           <div key={s.label} className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-2">
@@ -197,13 +200,13 @@ export default function AdminSiteDetailPage() {
 
       {/* Info */}
       <div className="rounded-2xl border border-border bg-card p-5 space-y-3 text-sm">
-        <h2 className="text-sm font-semibold text-foreground mb-3">Site Info</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-3">{t("siteInfo")}</h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {[
-            { label: "Owner", value: site.owner_email },
+            { label: t("owner"), value: site.owner_email },
             { label: "Description", value: site.description || "—" },
-            { label: "Created", value: new Date(site.created_at).toLocaleDateString() },
-            { label: "Last Crawled", value: site.last_crawled_at ? new Date(site.last_crawled_at).toLocaleString() : "Never" },
+            { label: t("created"), value: new Date(site.created_at).toLocaleDateString() },
+            { label: t("lastCrawled"), value: site.last_crawled_at ? new Date(site.last_crawled_at).toLocaleString() : "Never" },
           ].map(({ label, value }) => (
             <div key={label}>
               <span className="text-[11px] text-muted-foreground block mb-0.5">{label}</span>
@@ -215,7 +218,7 @@ export default function AdminSiteDetailPage() {
 
       {/* Status Update */}
       <div className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Update Status</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-4">{t("updateStatus")}</h2>
         <div className="flex flex-wrap items-center gap-3">
           <select
             value={statusValue}
@@ -230,7 +233,7 @@ export default function AdminSiteDetailPage() {
             className="flex items-center gap-2 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-all hover:opacity-90 disabled:opacity-50"
           >
             {statusSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            Save Status
+            {t("saveStatus")}
           </button>
           {statusMsg && <span className={`text-xs ${statusMsg.startsWith("✓") ? "text-accent" : "text-destructive"}`}>{statusMsg}</span>}
         </div>
@@ -238,8 +241,8 @@ export default function AdminSiteDetailPage() {
 
       {/* Reindex */}
       <div className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-sm font-semibold text-foreground mb-1">Trigger Reindex</h2>
-        <p className="text-xs text-muted-foreground mb-4">Queue a full re-crawl and re-index of all pages for this site.</p>
+        <h2 className="text-sm font-semibold text-foreground mb-1">{t("triggerReindex")}</h2>
+        <p className="text-xs text-muted-foreground mb-4">{t("triggerReindexDesc")}</p>
         <div className="flex items-center gap-3">
           <button
             onClick={triggerReindex}
@@ -247,7 +250,7 @@ export default function AdminSiteDetailPage() {
             className="flex items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-secondary/80 disabled:opacity-50"
           >
             {reindexing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-            Trigger Reindex
+            {t("triggerReindex")}
           </button>
           {reindexMsg && <span className={`text-xs ${reindexMsg.startsWith("✓") ? "text-accent" : "text-destructive"}`}>{reindexMsg}</span>}
         </div>
@@ -255,8 +258,8 @@ export default function AdminSiteDetailPage() {
 
       {/* Add Sitemap */}
       <div className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-sm font-semibold text-foreground mb-1">Add Sitemap</h2>
-        <p className="text-xs text-muted-foreground mb-4">Manually add a sitemap URL to this site (bypasses domain validation).</p>
+        <h2 className="text-sm font-semibold text-foreground mb-1">{t("addSitemapTitle")}</h2>
+        <p className="text-xs text-muted-foreground mb-4">{t("addSitemapDesc")}</p>
         <form onSubmit={addSitemap} className="space-y-3">
           <input
             type="url"
@@ -274,7 +277,7 @@ export default function AdminSiteDetailPage() {
                 onChange={(e) => setTriggerFetch(e.target.checked)}
                 className="h-4 w-4 rounded border-border accent-accent"
               />
-              Trigger fetch immediately
+              {t("triggerFetchImmediately")}
             </label>
             <button
               type="submit"
@@ -282,7 +285,7 @@ export default function AdminSiteDetailPage() {
               className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-background transition-all hover:opacity-90 disabled:opacity-50"
             >
               {sitemapAdding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-              Add Sitemap
+              {t("addSitemapTitle")}
             </button>
             {sitemapMsg && <span className={`text-xs ${sitemapMsg.startsWith("✓") ? "text-accent" : "text-destructive"}`}>{sitemapMsg}</span>}
           </div>

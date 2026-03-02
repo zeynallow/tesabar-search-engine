@@ -46,6 +46,33 @@ class AdCampaignRepository(BaseRepository[AdCampaign]):
         )
         return result.scalar_one()
 
+    async def get_draft_campaigns_to_activate(self) -> Sequence[AdCampaign]:
+        """DRAFT campaigns whose start_date has arrived (or have no start_date)."""
+        now = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            select(AdCampaign).where(
+                and_(
+                    AdCampaign.status == CampaignStatus.DRAFT,
+                    (AdCampaign.start_date.is_(None)) | (AdCampaign.start_date <= now),
+                )
+            )
+        )
+        return result.scalars().all()
+
+    async def get_active_campaigns_to_end(self) -> Sequence[AdCampaign]:
+        """ACTIVE campaigns whose end_date has passed."""
+        now = datetime.now(timezone.utc)
+        result = await self.db.execute(
+            select(AdCampaign).where(
+                and_(
+                    AdCampaign.status == CampaignStatus.ACTIVE,
+                    AdCampaign.end_date.isnot(None),
+                    AdCampaign.end_date < now,
+                )
+            )
+        )
+        return result.scalars().all()
+
     async def increment_spent(self, campaign_id: uuid.UUID, amount: float):
         await self.db.execute(
             update(AdCampaign)

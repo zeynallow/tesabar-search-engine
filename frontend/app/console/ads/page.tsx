@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Megaphone, Plus, Loader2, TrendingUp, MousePointer, DollarSign, Eye } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface Site {
   id: string
@@ -32,6 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default function AdsPage() {
+  const { t } = useLang()
   const token = typeof window !== "undefined" ? localStorage.getItem("console_token") : null
   const apiBase = process.env.NEXT_PUBLIC_API_URL
 
@@ -108,11 +110,11 @@ export default function AdsPage() {
 
   if (sites.length === 0) return (
     <div className="p-6 lg:p-8">
-      <h1 className="text-2xl font-bold text-foreground mb-2">Ads & Campaigns</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-2">{t("adsAndCampaigns")}</h1>
       <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center mt-6">
         <Megaphone className="mb-3 h-10 w-10 text-muted-foreground/30" />
-        <p className="text-sm text-muted-foreground">You have no registered sites yet.</p>
-        <p className="text-xs text-muted-foreground mt-1">Add a site first to create campaigns.</p>
+        <p className="text-sm text-muted-foreground">{t("noRegisteredSites")}</p>
+        <p className="text-xs text-muted-foreground mt-1">{t("addSiteFirst")}</p>
       </div>
     </div>
   )
@@ -121,15 +123,15 @@ export default function AdsPage() {
     <div className="p-6 lg:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Ads & Campaigns</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Boost your products in search results</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("adsAndCampaigns")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("boostProducts")}</p>
         </div>
         {selectedSiteId && (
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:opacity-90 transition-opacity"
           >
-            <Plus className="h-4 w-4" /> New Campaign
+            <Plus className="h-4 w-4" /> {t("newCampaign")}
           </button>
         )}
       </div>
@@ -155,10 +157,10 @@ export default function AdsPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl">
-            <h2 className="mb-4 text-lg font-bold text-foreground">New Campaign</h2>
+            <h2 className="mb-4 text-lg font-bold text-foreground">{t("newCampaign")}</h2>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Campaign Name</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">{t("campaignName")}</label>
                 <input
                   value={newCampaign.name}
                   onChange={(e) => setNewCampaign((p) => ({ ...p, name: e.target.value }))}
@@ -167,7 +169,7 @@ export default function AdsPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Budget (USD)</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">{t("budget")} (USD)</label>
                 <input
                   type="number"
                   value={newCampaign.budget}
@@ -178,14 +180,14 @@ export default function AdsPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">Budget Type</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">{t("budgetType")}</label>
                 <select
                   value={newCampaign.budget_type}
                   onChange={(e) => setNewCampaign((p) => ({ ...p, budget_type: e.target.value }))}
                   className="w-full rounded-xl border border-border bg-secondary px-3 py-2 text-sm text-foreground outline-none focus:border-accent"
                 >
-                  <option value="daily">Daily</option>
-                  <option value="total">Total</option>
+                  <option value="daily">{t("budgetDaily")}</option>
+                  <option value="total">{t("budgetTotal")}</option>
                 </select>
               </div>
               {createError && <p className="text-xs text-destructive">{createError}</p>}
@@ -194,14 +196,14 @@ export default function AdsPage() {
               <button
                 onClick={() => { setShowCreate(false); setCreateError("") }}
                 className="rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
-              >Cancel</button>
+              >{t("cancel")}</button>
               <button
                 onClick={createCampaign}
                 disabled={creating || !newCampaign.name || !newCampaign.budget}
                 className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-60"
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Create
+                {t("create")}
               </button>
             </div>
           </div>
@@ -216,8 +218,8 @@ export default function AdsPage() {
       ) : campaigns.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center">
           <Megaphone className="mb-3 h-10 w-10 text-muted-foreground/30" />
-          <p className="text-sm text-muted-foreground">No campaigns yet for this site.</p>
-          <p className="text-xs text-muted-foreground mt-1">Create a campaign to boost your products.</p>
+          <p className="text-sm text-muted-foreground">{t("noCampaigns")}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("noCampaignsDesc")}</p>
         </div>
       ) : (
         <div className="space-y-3">

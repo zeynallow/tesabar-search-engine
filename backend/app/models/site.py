@@ -42,6 +42,7 @@ class Site(Base, UUIDMixin, TimestampMixin):
     domain: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    country: Mapped[Optional[str]] = mapped_column(String(2), nullable=True, index=True)
     favicon_url: Mapped[Optional[str]] = mapped_column(String(2048), nullable=True)
     status: Mapped[SiteStatus] = mapped_column(Enum(SiteStatus), default=SiteStatus.PENDING, nullable=False)
     is_domain_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

@@ -4,13 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Globe, Megaphone, Settings, LogOut, ChevronRight } from "lucide-react"
-
-const navItems = [
-  { href: "/console", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/console/sites", label: "Sites", icon: Globe },
-  { href: "/console/ads", label: "Ads & Campaigns", icon: Megaphone },
-  { href: "/console/settings", label: "Settings", icon: Settings },
-]
+import { useLang } from "@/lib/i18n"
 
 const AUTH_ROUTES = ["/console/login", "/console/register"]
 
@@ -22,8 +16,16 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname()
   const router = useRouter()
   const [ready, setReady] = useState(false)
+  const { t } = useLang()
 
   const isAuthRoute = AUTH_ROUTES.includes(pathname) || isVerifyEmailRoute(pathname)
+
+  const navItems = [
+    { href: "/console", label: t("navDashboard"), icon: LayoutDashboard, exact: true },
+    { href: "/console/sites", label: t("navSites"), icon: Globe },
+    { href: "/console/ads", label: t("navAds"), icon: Megaphone },
+    { href: "/console/settings", label: t("navSettings"), icon: Settings },
+  ]
 
   useEffect(() => {
     if (isAuthRoute) {
@@ -108,7 +110,7 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4" />
-            Sign Out
+            {t("signOut")}
           </button>
         </div>
       </aside>

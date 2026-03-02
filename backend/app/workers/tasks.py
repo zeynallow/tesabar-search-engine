@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 from typing import List
 from app.workers.celery_app import celery_app
 from app.core.config import settings
@@ -16,16 +17,24 @@ def run_async(coro):
         loop.close()
 
 
-async def _get_db_session():
-    from app.core.database import AsyncSessionLocal
-    return AsyncSessionLocal()
+@asynccontextmanager
+async def task_db_session():
+    """Create a fresh engine + session for each Celery task to avoid event loop conflicts."""
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+    engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True, pool_size=2, max_overflow=0)
+    session_factory = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False, autoflush=False)
+    try:
+        async with session_factory() as session:
+            yield session
+    finally:
+        await engine.dispose()
 
 
 @celery_app.task(name="app.workers.tasks.fetch_sitemap_task", bind=True, max_retries=3)
 def fetch_sitemap_task(self, sitemap_id: str):
     """Fetch sitemap XML and create crawl jobs for all discovered URLs."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.repositories.site import SitemapRepository
         from app.repositories.indexing import IndexedPageRepository, IndexingJobRepository
         from app.models.site import SitemapStatus
@@ -34,7 +43,7 @@ def fetch_sitemap_task(self, sitemap_id: str):
         import uuid
         from datetime import datetime, timezone
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             sitemap_repo = SitemapRepository(db)
             page_repo = IndexedPageRepository(db)
             job_repo = IndexingJobRepository(db)
@@ -102,7 +111,6 @@ def fetch_sitemap_task(self, sitemap_id: str):
 def crawl_site_batch_task(self, site_id: str, job_id: str, batch_size: int = 50):
     """Crawl pending pages for a site in batches."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.repositories.indexing import IndexedPageRepository, IndexingJobRepository
         from app.models.indexing import JobStatus, PageStatus
         from app.services.crawler import WebCrawler, create_crawler_session
@@ -110,7 +118,7 @@ def crawl_site_batch_task(self, site_id: str, job_id: str, batch_size: int = 50)
         import uuid
         from datetime import datetime, timezone
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             page_repo = IndexedPageRepository(db)
             job_repo = IndexingJobRepository(db)
             indexer = IndexerService(db)
@@ -172,12 +180,11 @@ def crawl_site_batch_task(self, site_id: str, job_id: str, batch_size: int = 50)
 def crawl_url_task(self, site_id: str, url: str):
     """Crawl a single URL on demand."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.services.crawler import WebCrawler, create_crawler_session
         from app.services.indexer import IndexerService
         import uuid
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             indexer = IndexerService(db)
             session = await create_crawler_session()
             crawler = WebCrawler(session)
@@ -199,10 +206,9 @@ def crawl_url_task(self, site_id: str, url: str):
 def bulk_index_es_task():
     """Bulk index products to Elasticsearch."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.services.indexer import IndexerService
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             indexer = IndexerService(db)
             count = await indexer.bulk_index_products_to_es(limit=1000)
             await db.commit()
@@ -212,14 +218,27 @@ def bulk_index_es_task():
     run_async(_run())
 
 
+@celery_app.task(name="app.workers.tasks.auto_manage_campaigns_task")
+def auto_manage_campaigns_task():
+    """Activate DRAFT campaigns whose start_date has arrived; end ACTIVE campaigns whose end_date has passed."""
+    async def _run():
+        from app.services.ads import AdsService
+
+        async with task_db_session() as db:
+            ads_service = AdsService(db)
+            await ads_service.auto_manage_campaign_statuses()
+            await db.commit()
+
+    run_async(_run())
+
+
 @celery_app.task(name="app.workers.tasks.update_ad_boosts_task")
 def update_ad_boosts_task():
     """Sync ad boost scores to Elasticsearch."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.services.ads import AdsService
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             ads_service = AdsService(db)
             await ads_service.update_es_ad_boosts()
 
@@ -230,14 +249,13 @@ def update_ad_boosts_task():
 def verify_site_domain_task(self, site_id: str, method: str):
     """Verify site domain ownership via DNS TXT or meta tag."""
     async def _run():
-        from app.core.database import AsyncSessionLocal
         from app.repositories.site import SiteRepository
         from app.models.site import SiteStatus
         import uuid
         import aiohttp
         from bs4 import BeautifulSoup
 
-        async with AsyncSessionLocal() as db:
+        async with task_db_session() as db:
             site_repo = SiteRepository(db)
             site = await site_repo.get_by_id(uuid.UUID(site_id))
             if not site or site.is_domain_verified:

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Globe, Users, Activity, AlertCircle, CheckCircle2, Clock, TrendingUp, Database, Zap, ArrowRight } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface AdminStats {
   total_sites: number
@@ -34,6 +35,7 @@ const EMPTY_STATS: AdminStats = {
 }
 
 export default function AdminDashboard() {
+  const { t } = useLang()
   const [stats, setStats] = useState<AdminStats>(EMPTY_STATS)
   const [recentSites, setRecentSites] = useState<RecentSite[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,19 +58,19 @@ export default function AdminDashboard() {
   }, [])
 
   const statCards = [
-    { label: "Total Sites", value: stats.total_sites, sub: `${stats.active_sites} active`, icon: Globe, color: "text-accent" },
-    { label: "Registered Users", value: stats.total_users, sub: "site owners", icon: Users, color: "text-blue-400" },
-    { label: "Pages Indexed", value: stats.total_pages_indexed.toLocaleString(), sub: "across all sites", icon: Database, color: "text-purple-400" },
-    { label: "Search Queries Today", value: stats.search_queries_today.toLocaleString(), sub: "real-time", icon: Zap, color: "text-yellow-400" },
-    { label: "Jobs Running", value: stats.indexing_jobs_running, sub: `${stats.indexing_jobs_queued} queued`, icon: Activity, color: "text-emerald-400" },
-    { label: "Active Campaigns", value: stats.total_active_campaigns, sub: "ad campaigns", icon: AlertCircle, color: "text-orange-400" },
+    { label: t("totalSites"), value: stats.total_sites, sub: `${stats.active_sites} ${t("active")}`, icon: Globe, color: "text-accent" },
+    { label: t("registeredUsers"), value: stats.total_users, sub: "site owners", icon: Users, color: "text-blue-400" },
+    { label: t("statPagesIndexed"), value: stats.total_pages_indexed.toLocaleString(), sub: "across all sites", icon: Database, color: "text-purple-400" },
+    { label: t("searchQueriesToday"), value: stats.search_queries_today.toLocaleString(), sub: "real-time", icon: Zap, color: "text-yellow-400" },
+    { label: t("jobsRunning"), value: stats.indexing_jobs_running, sub: `${stats.indexing_jobs_queued} ${t("queued")}`, icon: Activity, color: "text-emerald-400" },
+    { label: t("activeCampaigns"), value: stats.total_active_campaigns, sub: "ad campaigns", icon: AlertCircle, color: "text-orange-400" },
   ]
 
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">System Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Real-time overview of the Tesabar platform</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("systemDashboard")}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t("platformOverview")}</p>
       </div>
 
       {/* Stats Grid */}
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
       {/* Recent Sites */}
       <div className="rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-sm font-semibold text-foreground">Recent Sites</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("recentSites")}</h2>
           <Link href="/admin/sites" className="flex items-center gap-1 text-xs text-accent hover:underline">
             View all <ArrowRight className="h-3 w-3" />
           </Link>
@@ -131,9 +133,9 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
-          { label: "Manage Sites", href: "/admin/sites", icon: Globe, desc: "View and manage all registered sites" },
-          { label: "Manage Users", href: "/admin/users", icon: Users, desc: "View site owners and their accounts" },
-          { label: "Indexing Jobs", href: "/admin/indexing", icon: Activity, desc: "Monitor and control indexing pipeline" },
+          { label: t("manageSites"), href: "/admin/sites", icon: Globe, desc: t("manageSitesDesc") },
+          { label: t("manageUsers"), href: "/admin/users", icon: Users, desc: t("manageUsersDesc") },
+          { label: t("indexingJobs"), href: "/admin/indexing", icon: Activity, desc: t("indexingJobsDesc") },
         ].map((action) => (
           <Link
             key={action.href}

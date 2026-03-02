@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Plus, Globe, CheckCircle2, Clock, XCircle, AlertCircle, ArrowRight } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface Site {
   id: string
@@ -18,6 +19,7 @@ interface Site {
 }
 
 export default function ConsoleSitesPage() {
+  const { t } = useLang()
   const [sites, setSites] = useState<Site[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -37,15 +39,15 @@ export default function ConsoleSitesPage() {
     <div className="p-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Sites</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage your registered stores</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("sites")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("manageRegisteredStores")}</p>
         </div>
         <Link
           href="/console/sites/new"
           className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-accent-foreground hover:opacity-90 transition-opacity"
         >
           <Plus className="h-4 w-4" />
-          Add Site
+          {t("addSite")}
         </Link>
       </div>
 
@@ -58,10 +60,10 @@ export default function ConsoleSitesPage() {
       ) : sites.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-20 text-center">
           <Globe className="mb-3 h-12 w-12 text-muted-foreground/30" />
-          <p className="text-sm font-medium text-foreground mb-1">No sites yet</p>
-          <p className="text-xs text-muted-foreground mb-5">Add your first store to start indexing</p>
+          <p className="text-sm font-medium text-foreground mb-1">{t("noSitesYet")}</p>
+          <p className="text-xs text-muted-foreground mb-5">{t("addFirstSite")}</p>
           <Link href="/console/sites/new" className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-medium text-accent-foreground">
-            <Plus className="h-3.5 w-3.5" /> Add Site
+            <Plus className="h-3.5 w-3.5" /> {t("addSite")}
           </Link>
         </div>
       ) : (
@@ -89,16 +91,16 @@ export default function ConsoleSitesPage() {
                 <span className="text-xs text-muted-foreground">{site.domain}</span>
                 {site.last_crawled_at && (
                   <span className="ml-3 text-[10px] text-muted-foreground/70">
-                    Last crawled: {new Date(site.last_crawled_at).toLocaleDateString()}
+                    {t("lastCrawled")}: {new Date(site.last_crawled_at).toLocaleDateString()}
                   </span>
                 )}
               </div>
 
               <div className="hidden md:flex items-center gap-8">
-                <Metric label="Indexed" value={site.total_pages_indexed.toLocaleString()} />
-                <Metric label="Crawled" value={site.total_pages_crawled.toLocaleString()} />
+                <Metric label={t("statPagesIndexed")} value={site.total_pages_indexed.toLocaleString()} />
+                <Metric label={t("crawled")} value={site.total_pages_crawled.toLocaleString()} />
                 {site.total_pages_with_issues > 0 && (
-                  <Metric label="Issues" value={site.total_pages_with_issues.toString()} highlight />
+                  <Metric label={t("statIssues")} value={site.total_pages_with_issues.toString()} highlight />
                 )}
               </div>
 
@@ -121,11 +123,12 @@ function Metric({ label, value, highlight }: { label: string; value: string; hig
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useLang()
   const map: Record<string, { icon: React.ComponentType<{className?: string}>; cls: string; label: string }> = {
-    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: "Active" },
-    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: "Pending" },
-    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: "Suspended" },
-    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: "Banned" },
+    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: t("statusActive") },
+    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: t("statusPending") },
+    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: t("statusSuspended") },
+    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: t("statusBanned") },
   }
   const cfg = map[status] || { icon: Globe, cls: "bg-secondary text-muted-foreground", label: status }
   const Icon = cfg.icon

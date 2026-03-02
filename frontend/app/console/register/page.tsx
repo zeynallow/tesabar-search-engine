@@ -4,8 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 export default function ConsoleRegisterPage() {
+  const { t } = useLang()
   const [form, setForm] = useState({ email: "", password: "", full_name: "", company_name: "" })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -69,10 +71,10 @@ export default function ConsoleRegisterPage() {
           </h2>
           <ul className="space-y-3">
             {[
-              "Submit your sitemap — we handle the rest",
-              "Get indexed in under 24 hours",
-              "Boost visibility with targeted ads",
-              "Monitor crawl health & SEO issues",
+              t("registerBenefit1"),
+              t("registerBenefit2"),
+              t("registerBenefit3"),
+              t("registerBenefit4"),
             ].map((item) => (
               <li key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                 <div className="h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
@@ -83,8 +85,7 @@ export default function ConsoleRegisterPage() {
         </div>
         <div className="rounded-2xl border border-border bg-secondary p-5">
           <p className="text-xs text-muted-foreground">
-            Already trusted by <span className="text-foreground font-medium">10,000+</span> stores worldwide.
-            Free to start — no credit card required.
+            {t("alreadyTrusted")}
           </p>
         </div>
       </div>
@@ -104,13 +105,13 @@ export default function ConsoleRegisterPage() {
             </span>
           </Link>
 
-          <h1 className="text-2xl font-bold text-foreground mb-1">Create your account</h1>
-          <p className="text-sm text-muted-foreground mb-8">Start indexing your store today</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">{t("createAccount")}</h1>
+          <p className="text-sm text-muted-foreground mb-8">{t("startIndexingToday")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Full Name</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("fullName")}</label>
                 <input
                   type="text"
                   value={form.full_name}
@@ -120,7 +121,7 @@ export default function ConsoleRegisterPage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Company</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("company")}</label>
                 <input
                   type="text"
                   value={form.company_name}
@@ -131,7 +132,7 @@ export default function ConsoleRegisterPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Email address</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("emailAddress")}</label>
               <input
                 type="email"
                 value={form.email}
@@ -142,7 +143,7 @@ export default function ConsoleRegisterPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Password</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("password")}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -174,13 +175,13 @@ export default function ConsoleRegisterPage() {
               disabled={loading}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Create Account <ArrowRight className="h-4 w-4" /></>}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{t("createAccountBtn")} <ArrowRight className="h-4 w-4" /></>}
             </button>
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/console/login" className="text-accent hover:underline font-medium">Sign in</Link>
+            {t("alreadyHaveAccount")}{" "}
+            <Link href="/console/login" className="text-accent hover:underline font-medium">{t("signInConsole")}</Link>
           </p>
           <p className="mt-3 text-center text-[10px] text-muted-foreground/60">
             By creating an account you agree to our Terms of Service and Privacy Policy.

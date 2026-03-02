@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Globe, CheckCircle2, Clock, AlertCircle, XCircle, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 interface AdminSite {
   id: string
@@ -18,6 +19,7 @@ interface AdminSite {
 const STATUS_OPTS = ["all", "active", "pending", "suspended", "banned"]
 
 export default function AdminSitesPage() {
+  const { t } = useLang()
   const [sites, setSites] = useState<AdminSite[]>([])
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -46,8 +48,8 @@ export default function AdminSitesPage() {
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">All Sites</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage all registered stores on the platform</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("allSitesTitle")}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{t("manageAllStores")}</p>
       </div>
 
       {/* Filters */}
@@ -58,7 +60,7 @@ export default function AdminSitesPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by domain or name…"
+            placeholder={t("searchByDomain")}
             className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/60 focus:border-accent transition-colors"
           />
         </div>
@@ -84,10 +86,10 @@ export default function AdminSitesPage() {
             <thead>
               <tr className="border-b border-border bg-secondary/50">
                 <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Site</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Owner</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
-                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Indexed</th>
-                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Actions</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("owner")}</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("status")}</th>
+                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("statPagesIndexed")}</th>
+                <th className="px-5 py-3 text-right text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">{t("actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -102,7 +104,7 @@ export default function AdminSitesPage() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-16 text-center text-sm text-muted-foreground">
-                    No sites found
+                    {t("noSitesFound")}
                   </td>
                 </tr>
               ) : (
@@ -149,11 +151,12 @@ export default function AdminSitesPage() {
 }
 
 function SiteBadge({ status }: { status: string }) {
+  const { t } = useLang()
   const map: Record<string, { icon: React.ComponentType<{className?: string}>; cls: string; label: string }> = {
-    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: "Active" },
-    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: "Pending" },
-    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: "Suspended" },
-    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: "Banned" },
+    active: { icon: CheckCircle2, cls: "bg-accent/10 text-accent", label: t("statusActive") },
+    pending: { icon: Clock, cls: "bg-amber-400/10 text-amber-400", label: t("statusPending") },
+    suspended: { icon: AlertCircle, cls: "bg-orange-400/10 text-orange-400", label: t("statusSuspended") },
+    banned: { icon: XCircle, cls: "bg-destructive/10 text-destructive", label: t("statusBanned") },
   }
   const cfg = map[status] || { icon: Globe, cls: "bg-secondary text-muted-foreground", label: status }
   const Icon = cfg.icon
@@ -165,6 +168,7 @@ function SiteBadge({ status }: { status: string }) {
 }
 
 function SiteActions({ siteId, status, onUpdate }: { siteId: string; status: string; onUpdate: (s: string) => void }) {
+  const { t } = useLang()
   const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null
 
   async function updateStatus(newStatus: string) {
@@ -182,17 +186,17 @@ function SiteActions({ siteId, status, onUpdate }: { siteId: string; status: str
     <div className="flex items-center justify-end gap-1">
       {status !== "active" && (
         <button onClick={() => updateStatus("active")} className="rounded-lg px-2 py-1 text-[10px] font-medium text-accent hover:bg-accent/10 transition-colors">
-          Activate
+          {t("activate")}
         </button>
       )}
       {status !== "suspended" && status !== "banned" && (
         <button onClick={() => updateStatus("suspended")} className="rounded-lg px-2 py-1 text-[10px] font-medium text-orange-400 hover:bg-orange-400/10 transition-colors">
-          Suspend
+          {t("suspend")}
         </button>
       )}
       {status !== "banned" && (
         <button onClick={() => updateStatus("banned")} className="rounded-lg px-2 py-1 text-[10px] font-medium text-destructive hover:bg-destructive/10 transition-colors">
-          Ban
+          {t("ban")}
         </button>
       )}
     </div>

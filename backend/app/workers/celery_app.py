@@ -24,6 +24,7 @@ celery_app.conf.update(
         "app.workers.tasks.bulk_index_es_task": {"queue": "indexing"},
         "app.workers.tasks.verify_site_domain_task": {"queue": "verification"},
         "app.workers.tasks.update_ad_boosts_task": {"queue": "ads"},
+        "app.workers.tasks.auto_manage_campaigns_task": {"queue": "ads"},
     },
     beat_schedule={
         "bulk-index-es-every-5-min": {
@@ -33,6 +34,10 @@ celery_app.conf.update(
         "update-ad-boosts-every-10-min": {
             "task": "app.workers.tasks.update_ad_boosts_task",
             "schedule": 600.0,
+        },
+        "auto-manage-campaigns-every-5-min": {
+            "task": "app.workers.tasks.auto_manage_campaigns_task",
+            "schedule": 300.0,
         },
     },
 )
