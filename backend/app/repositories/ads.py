@@ -80,6 +80,37 @@ class AdCampaignRepository(BaseRepository[AdCampaign]):
             .values(spent_amount=AdCampaign.spent_amount + amount)
         )
 
+    async def increment_click_stats(self, campaign_id: uuid.UUID, cost: float):
+        """Atomically increment campaign total_clicks and spent_amount."""
+        await self.db.execute(
+            update(AdCampaign)
+            .where(AdCampaign.id == campaign_id)
+            .values(
+                total_clicks=AdCampaign.total_clicks + 1,
+                spent_amount=AdCampaign.spent_amount + cost,
+            )
+        )
+
+    async def check_and_exhaust_budget(self, campaign_id: uuid.UUID):
+        """Set campaign to BUDGET_EXHAUSTED if spent_amount >= budget."""
+        result = await self.db.execute(
+            select(AdCampaign).where(
+                and_(
+                    AdCampaign.id == campaign_id,
+                    AdCampaign.status == CampaignStatus.ACTIVE,
+                    AdCampaign.spent_amount >= AdCampaign.budget,
+                    AdCampaign.budget_type == "total",
+                )
+            )
+        )
+        campaign = result.scalar_one_or_none()
+        if campaign:
+            await self.db.execute(
+                update(AdCampaign)
+                .where(AdCampaign.id == campaign_id)
+                .values(status=CampaignStatus.BUDGET_EXHAUSTED)
+            )
+
 
 class AdGroupRepository(BaseRepository[AdGroup]):
     def __init__(self, db: AsyncSession):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Request, Depends
+from fastapi import APIRouter, Query, Request, Depends, HTTPException, status
 from typing import Optional, List
 from app.api.deps import Cache
 from app.schemas.search import (
@@ -13,6 +13,7 @@ from app.repositories.site import SiteRepository
 from app.repositories.indexing import ProductRepository
 from app.models.site import SiteStatus
 from app.core.database import get_db
+from app.core.redis_client import get_redis, CacheManager
 
 router = APIRouter(prefix="/search", tags=["Search"])
 
@@ -81,17 +82,29 @@ async def track_ad_click(
     request: Request,
     q: str = Query("", description="Search query that led to this click"),
     db=Depends(get_db),
+    redis=Depends(get_redis),
 ):
     """
     Track a click on a sponsored ad result.
-    This records the click, charges the advertiser, and returns redirect URL.
+    Includes IP-based rate limiting (max 3 clicks per ad per IP per hour) to prevent click fraud.
     """
     import uuid
     from app.services.ads import AdsService
-    service = AdsService(db)
-    client_ip = request.client.host if request.client else ""
+
+    client_ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "")
 
+    # Rate limiting: max 3 clicks per (IP, ad) per hour
+    cache = CacheManager(redis)
+    rate_key = f"adclick:{client_ip}:{ad_id}"
+    click_count = await cache.increment(rate_key, ttl=3600)
+    if click_count > 3:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many clicks from this IP. Please try again later.",
+        )
+
+    service = AdsService(db)
     await service.record_click(
         ad_id=uuid.UUID(ad_id),
         ip=client_ip,

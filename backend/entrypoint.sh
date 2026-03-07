@@ -25,7 +25,7 @@ wait_for "${REDIS_HOST:-localhost}" "${REDIS_PORT:-6379}" "Redis"
 
 if [ "$APP_ROLE" = "api" ]; then
   echo "Running Alembic migrations..."
-  #alembic upgrade head DEAKTIV
+  alembic upgrade head
 
   echo "Starting API server..."
   exec uvicorn app.main:app \

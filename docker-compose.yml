@@ -4,10 +4,7 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: tesabar
-      POSTGRES_PASSWORD: tesabar_pass
-      POSTGRES_DB: tesabar_db
+    env_file: ./backend/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -81,11 +78,6 @@ services:
     env_file: ./backend/.env
     environment:
       APP_ROLE: api
-      DATABASE_URL: postgresql+asyncpg://tesabar:tesabar_pass@postgres:5432/tesabar_db
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
-      CELERY_RESULT_BACKEND: redis://redis:6379/2
-      ELASTICSEARCH_URL: http://elasticsearch:9200
     ports:
       - "8000:8000"
     depends_on:
@@ -107,12 +99,6 @@ services:
     env_file: ./backend/.env
     environment:
       APP_ROLE: worker
-      DATABASE_URL: postgresql+asyncpg://tesabar:tesabar_pass@postgres:5432/tesabar_db
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
-      CELERY_RESULT_BACKEND: redis://redis:6379/2
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      CELERY_CONCURRENCY: "4"
     depends_on:
       postgres:
         condition: service_healthy
@@ -147,11 +133,6 @@ services:
     env_file: ./backend/.env
     environment:
       APP_ROLE: beat
-      DATABASE_URL: postgresql+asyncpg://tesabar:tesabar_pass@postgres:5432/tesabar_db
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
-      CELERY_RESULT_BACKEND: redis://redis:6379/2
-      ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
       - redis
     networks:

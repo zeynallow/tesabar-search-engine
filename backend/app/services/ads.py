@@ -121,7 +121,13 @@ class AdsService:
         )
         await self.click_repo.create(click)
         await self.ad_repo.increment_click(ad_id, cost)
-        await self.campaign_repo.increment_spent(ad.group.campaign_id, cost) if hasattr(ad, 'group') else None
+
+        # Load the group to get campaign_id (avoid lazy relationship access in async context)
+        group = await self.group_repo.get_by_id(ad.group_id)
+        if group:
+            await self.campaign_repo.increment_click_stats(group.campaign_id, cost)
+            await self.campaign_repo.check_and_exhaust_budget(group.campaign_id)
+
         return click
 
     async def get_campaign_stats(self, campaign_id: uuid.UUID, user: User) -> CampaignStatsResponse:

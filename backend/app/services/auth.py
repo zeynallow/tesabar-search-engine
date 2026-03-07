@@ -8,7 +8,7 @@ from app.core.security import (
 )
 from app.core.config import settings
 from app.core.exceptions import (
-    InvalidCredentialsError, AlreadyExistsError, NotFoundError, PermissionDeniedError
+    InvalidCredentialsError, AlreadyExistsError, NotFoundError, PermissionDeniedError,
 )
 from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse
 import structlog
@@ -44,6 +44,8 @@ class AuthService:
             raise InvalidCredentialsError()
         if not user.is_active:
             raise PermissionDeniedError("Account is inactive")
+        if not user.is_verified:
+            raise PermissionDeniedError("Email address not verified. Please check your inbox.")
 
         access_token = create_access_token(
             subject=str(user.id),

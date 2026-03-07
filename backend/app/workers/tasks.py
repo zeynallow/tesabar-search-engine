@@ -151,8 +151,9 @@ def crawl_site_batch_task(self, site_id: str, job_id: str, batch_size: int = 50)
                         failed += 1
                         logger.error("Page crawl failed", url=page.url, error=str(e))
 
+                remaining = await page_repo.count_by_site(uuid.UUID(site_id), status=PageStatus.PENDING)
+
                 if job:
-                    remaining = await page_repo.count_by_site(uuid.UUID(site_id), status=PageStatus.PENDING)
                     await job_repo.update(
                         job,
                         processed_urls=job.processed_urls + processed,
@@ -273,6 +274,25 @@ def verify_site_domain_task(self, site_id: str, method: str):
                             meta = soup.find("meta", attrs={"name": "tesabar-site-verification"})
                             if meta and meta.get("content") == token:
                                 verified = True
+                except Exception as e:
+                    raise self.retry(exc=e, countdown=120)
+
+            elif method == "dns_txt":
+                try:
+                    # Use Google DNS-over-HTTPS to look up TXT records without dnspython dependency
+                    verification_domain = f"_tesabar-verification.{site.domain}"
+                    doh_url = f"https://dns.google/resolve?name={verification_domain}&type=TXT"
+                    expected_value = f"tesabar-site-verification={token}"
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(doh_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                            if resp.status == 200:
+                                data = await resp.json()
+                                for answer in data.get("Answer", []):
+                                    # TXT record data comes quoted, e.g. '"tesabar-site-verification=abc"'
+                                    txt_value = answer.get("data", "").strip('"')
+                                    if txt_value == expected_value:
+                                        verified = True
+                                        break
                 except Exception as e:
                     raise self.retry(exc=e, countdown=120)
 

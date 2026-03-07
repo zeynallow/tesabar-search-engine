@@ -244,7 +244,10 @@ class SearchService:
         es = await get_es()
         docs = await es.mget(index=settings.ES_INDEX_PRODUCTS, ids=product_ids)
         products = []
-        all_attribute_keys = set()
+        # key -> set of unique string-casted values across all products
+        attribute_values: Dict[str, set] = {}
+
+        compare_keys = ["brand", "category", "sku", "currency", "in_stock", "rating", "review_count", "discount_percent"]
 
         for doc in docs.get("docs", []):
             if not doc.get("found"):
@@ -252,17 +255,22 @@ class SearchService:
             product = _map_hit({"_id": doc["_id"], "_source": doc["_source"], "_score": None})
             src = doc["_source"]
             attrs = []
-            for key in ["brand", "category", "sku", "currency", "in_stock", "rating", "review_count", "discount_percent"]:
+            for key in compare_keys:
                 val = src.get(key)
                 if val is not None:
                     attrs.append(ProductAttribute(name=key, value=val))
-                    all_attribute_keys.add(key)
+                    attribute_values.setdefault(key, set()).add(str(val))
             products.append(ProductCompareItem(product=product, attributes=attrs))
+
+        # An attribute is "different" if it has more than one unique value across products
+        # An attribute is "common" if all products share the same value
+        diff_attributes = [k for k, vals in attribute_values.items() if len(vals) > 1]
+        common_attributes = [k for k, vals in attribute_values.items() if len(vals) == 1]
 
         return CompareResponse(
             products=products,
-            common_attributes=list(all_attribute_keys),
-            diff_attributes=[],
+            common_attributes=common_attributes,
+            diff_attributes=diff_attributes,
         )
 
     async def get_trending(self, limit: int = 6) -> TrendingResponse:
